@@ -1,62 +1,55 @@
-let weather = {
+const weather = {
   apiKey: "708e7fd59bd92264d03b61977f53ccc2",
 
-  // Fetch weather using city name
-  fetchWeather: function(city) {
-    city = city.trim(); // remove leading/trailing spaces
+  fetchWeather(city) {
     if (!city) return;
 
+    document.querySelector(".loading").classList.remove("hidden");
+    document.querySelector(".weather").classList.add("hidden");
+    document.querySelector(".error").classList.add("hidden");
+
     fetch(
-      "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=metric&appid=" + this.apiKey
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${this.apiKey}`
     )
-    .then(response => {
-      if (!response.ok) {
-        alert("No weather found.");
-        throw new Error("No weather found.");
-      }
-      return response.json();
-    })
-    .then(data => this.displayWeather(data))
-    .catch(error => console.error(error));
+      .then(res => {
+        if (!res.ok) throw new Error("City not found");
+        return res.json();
+      })
+      .then(data => this.displayWeather(data))
+      .catch(() => {
+        document.querySelector(".error").innerText = "City not found";
+        document.querySelector(".error").classList.remove("hidden");
+        document.querySelector(".loading").classList.add("hidden");
+      });
   },
 
-  // Display weather data in HTML
-  displayWeather: function(data) {
-    const { name } = data;
-    const { icon, description } = data.weather[0];
-    const { temp, humidity } = data.main;
-    const { speed } = data.wind;
+  displayWeather(data) {
+    document.querySelector(".city").innerText = `Weather in ${data.name}`;
+    document.querySelector(".temp").innerText = `${data.main.temp}°C`;
+    document.querySelector(".description").innerText = data.weather[0].description;
+    document.querySelector(".humidity").innerText = `Humidity: ${data.main.humidity}%`;
+    document.querySelector(".wind").innerText = `Wind speed: ${data.wind.speed} m/s`;
 
-    document.querySelector(".city").innerText = "Weather in " + name;
     document.querySelector(".icon").src =
-      "https://openweathermap.org/img/wn/" + icon + ".png";
-    document.querySelector(".icon").alt = description;
-    document.querySelector(".description").innerText = description;
-    document.querySelector(".temp").innerText = temp + "°C";
-    document.querySelector(".humidity").innerText = "Humidity: " + humidity + "%";
-    document.querySelector(".wind").innerText = "Wind speed: " + speed.toFixed(1) + " m/s";
-    // Fixed background image
-    document.body.style.backgroundImage =
-      "url('https://images.unsplash.com/photo-1501785888041-af3ef285b470')";
+      `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+
+    document.querySelector(".loading").classList.add("hidden");
+    document.querySelector(".weather").classList.remove("hidden");
   },
 
-  // Called when search is triggered
-  search: function() {
+  search() {
     const city = document.querySelector(".search-bar").value;
     this.fetchWeather(city);
-  },
+  }
 };
 
-// Event listeners
-document.querySelector(".search button").addEventListener("click", function() {
+document.querySelector("button").addEventListener("click", () => {
   weather.search();
 });
 
-document.querySelector(".search-bar").addEventListener("keyup", function(event) {
-  if (event.key === "Enter") {
-    weather.search();
-  }
+document.querySelector(".search-bar").addEventListener("keyup", e => {
+  if (e.key === "Enter") weather.search();
 });
 
-// Fetch default city (Tokyo) on page load
+// default city
 weather.fetchWeather("Vijayawada");
