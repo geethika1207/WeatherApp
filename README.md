@@ -13,7 +13,7 @@ The app shows the current weather of a city, including temperature, weather cond
  - Clean and responsive UI
 # Tech Stack I used
  - HTML
- - CSS
+ - CSS 
  - JavaScript 
  - OpenWeather API
 
